@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learning Style Quiz - LearnNaija</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #f0f2f5;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* NAVBAR */
+        .navbar {
+            background: linear-gradient(135deg, #008751, #004225);
+            padding: 12px 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .navbar-brand {
+            color: white !important;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .navbar-brand span {
+            color: #FFD700;
+        }
+
+        .nav-link {
+            color: white !important;
+            font-weight: 500;
+        }
+
+        .btn-logout {
+            background: #FFD700;
+            color: #004225 !important;
+            border-radius: 20px;
+            padding: 6px 20px;
+            font-weight: 700;
+        }
+
+        /* QUIZ HEADER */
+        .quiz-header {
+            background: linear-gradient(135deg, #008751, #004225);
+            color: white;
+            padding: 40px 0;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .quiz-header h2 {
+            font-weight: 800;
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .quiz-header p {
+            opacity: 0.9;
+            font-size: 1rem;
+            margin: 0;
+        }
+
+        /* PROGRESS BAR */
+        .progress-container {
+            margin-bottom: 30px;
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            color: #004225;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .progress {
+            height: 10px;
+            border-radius: 10px;
+            background: #e0e0e0;
+        }
+
+        .progress-bar {
+            background: linear-gradient(135deg, #008751, #004225);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+
+        /* QUESTION CARD */
+        .question-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            margin-bottom: 25px;
+            display: none;
+        }
+
+        .question-card.active {
+            display: block;
+        }
+
+        .question-number {
+            background: linear-gradient(135deg, #008751, #004225);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 15px;
+        }
+
+        .question-text {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #004225;
+            margin-bottom: 25px;
+        }
+
+        /* OPTIONS */
+        .option-label {
+            display: block;
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 15px 20px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .option-label:hover {
+            border-color: #008751;
+            background: #f0fff8;
+            transform: translateX(5px);
+        }
+
+        .option-label input {
+            margin-right: 12px;
+            accent-color: #008751;
+        }
+
+        .option-label.selected {
+            border-color: #008751;
+            background: #e8f5e9;
+            color: #004225;
+        }
+
+        /* NAVIGATION BUTTONS */
+        .quiz-nav {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .btn-prev {
+            background: #f8f9fa;
+            color: #004225;
+            border: 2px solid #004225;
+            border-radius: 25px;
+            padding: 10px 30px;
+            font-weight: 700;
+            transition: all 0.3s;
+        }
+
+        .btn-prev:hover {
+            background: #004225;
+            color: white;
+        }
+
+        .btn-next {
+            background: linear-gradient(135deg, #008751, #004225);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            padding: 10px 30px;
+            font-weight: 700;
+            transition: all 0.3s;
+        }
+
+        .btn-next:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 135, 81, 0.4);
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #004225;
+            border: none;
+            border-radius: 25px;
+            padding: 12px 40px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+            display: none;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.4);
+        }
+
+        /* QUIZ INFO */
+        .quiz-info {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.08);
+            margin-bottom: 25px;
+        }
+
+        .quiz-info h6 {
+            color: #004225;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .style-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+            color: #555;
+        }
+
+        .style-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="/">Learn<span>Naija</span></a>
+            <div class="collapse navbar-collapse justify-content-end">
+                <ul class="navbar-nav align-items-center gap-2">
+                    <li class="nav-item"><a class="nav-link" href="/dashboard"><i class="fas fa-home"></i> Dashboard</a>
+                    </li>
+                    <li class="nav-item"><a class="nav-link btn-logout" href="/logout"><i
+                                class="fas fa-sign-out-alt"></i> Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- QUIZ HEADER -->
+    <div class="quiz-header">
+        <div class="container">
+            <h2><i class="fas fa-brain"></i> Learning Style Quiz</h2>
+            <p>Answer all 10 questions honestly to get the best recommendations for you</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row">
+
+            <!-- QUIZ AREA -->
+            <div class="col-lg-8">
+
+                <!-- PROGRESS BAR -->
+                <div class="progress-container">
+                    <div class="progress-label">
+                        <span>Question <span id="current-q">1</span> of 10</span>
+                        <span id="progress-percent">10%</span>
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar" id="progress-bar" style="width: 10%"></div>
+                    </div>
+                </div>
+
+                <!-- QUIZ FORM -->
+                <form method="POST" action="/quiz" id="quizForm">
+
+                    <!-- QUESTION 1 -->
+                    <div class="question-card active" id="q1">
+                        <div class="question-number">1</div>
+                        <div class="question-text">When you are trying to learn something new, what do you prefer?</div>
+                        <label class="option-label">
+                            <input type="radio" name="q1" value="visual" required>
+                            Watching a video or looking at diagrams and pictures
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q1" value="reading">
+                            Reading a textbook, article or written notes
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q1" value="practical">
+                            Trying it out yourself through practice or experiments
+                        </label>
+                    </div>
+
+                    <!-- QUESTION 2 -->
+                    <div class="question-card" id="q2">
+                        <div class="question-number">2</div>
+                        <div class="question-text">In class, you understand better when your lecturer:</div>
+                        <label class="option-label">
+                            <input type="radio" name="q2" value="visual" required>
+                            Uses slides, charts, diagrams and visual aids
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q2" value="reading">
+                            Explains with detailed notes written on the board
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q2" value="practical">
+                            Gives assignments, lab work or real-life examples
+                        </label>
+                    </div>
+
+                    <!-- QUESTION 3 -->
+                    <div class="question-card" id="q3">
+                        <div class="question-number">3</div>
+                        <div class="question-text">When you want to remember something important, you usually:</div>
+                        <label class="option-label">
+                            <input type="radio" name="q3" value="visual" required>
+                            Draw a diagram, mind map or use colour coding
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q3" value="reading">
+                            Write it down repeatedly or summarize it in your own words
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q3" value="practical">
+                            Repeat it by doing the action or practicing it
+                        </label>
+                    </div>
+
+                    <!-- QUESTION 4 -->
+                    <div class="question-card" id="q4">
+                        <div class="question-number">4</div>
+                        <div class="question-text">If you are studying for an exam, your preferred method is:</div>
+                        <label class="option-label">
+                            <input type="radio" name="q4" value="visual" required>
+                            Watching YouTube tutorials and educational videos
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q4" value="reading">
+                            Reading past questions, handouts and textbooks
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q4" value="practical">
+                            Solving past questions and doing practice exercises
+                        </label>
+                    </div>
+
+                    <!-- QUESTION 5 -->
+                    <div class="question-card" id="q5">
+                        <div class="question-number">5</div>
+                        <div class="question-text">When you need directions to a new place, you prefer:</div>
+                        <label class="option-label">
+                            <input type="radio" name="q5" value="visual" required>
+                            Looking at a map or watching a video of the route
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q5" value="reading">
+                            Reading written step-by-step directions
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q5" value="practical">
+                            Just going there and figuring it out yourself
+                        </label>
+                    </div>
+
+                    <!-- QUESTION 6 -->
+                    <div class="question-card" id="q6">
+                        <div class="question-number">6</div>
+                        <div class="question-text">Which type of course content do you enjoy the most?</div>
+                        <label class="option-label">
+                            <input type="radio" name="q6" value="visual" required>
+                            Video lectures with animations and visual explanations
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q6" value="reading">
+                            PDF notes, eBooks and written study materials
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q6" value="practical">
+                            Projects, coding exercises and practical assignments
+                        </label>
+                    </div>
+
+                    <!-- QUESTION 7 -->
+                    <div class="question-card" id="q7">
+                        <div class="question-number">7</div>
+                        <div class="question-text">When you are bored in class, you are most likely to:</div>
+                        <label class="option-label">
+                            <input type="radio" name="q7" value="visual" required>
+                            Doodle, draw or look around the room at things
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q7" value="reading">
+                            Read something else or browse written content
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q7" value="practical">
+                            Tap your feet, fidget or want to get up and do something
+                        </label>
+                    </div>
+
+                    <!-- QUESTION 8 -->
+                    <div class="question-card" id="q8">
+                        <div class="question-number">8</div>
+                        <div class="question-text">You find it easiest to learn a new software or app by:</div>
+                        <label class="option-label">
+                            <input type="radio" name="q8" value="visual" required>
+                            Watching a tutorial video on YouTube
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q8" value="reading">
+                            Reading the documentation or a step-by-step guide
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q8" value="practical">
+                            Just clicking around and exploring it yourself
+                        </label>
+                    </div>
+
+                    <!-- QUESTION 9 -->
+                    <div class="question-card" id="q9">
+                        <div class="question-number">9</div>
+                        <div class="question-text">After attending a lecture, you remember it best by:</div>
+                        <label class="option-label">
+                            <input type="radio" name="q9" value="visual" required>
+                            Reviewing slides, diagrams or pictures from the lecture
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q9" value="reading">
+                            Re-reading your written notes carefully
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q9" value="practical">
+                            Doing related exercises or applying what was taught
+                        </label>
+                    </div>
+
+                    <!-- QUESTION 10 -->
+                    <div class="question-card" id="q10">
+                        <div class="question-number">10</div>
+                        <div class="question-text">Your dream learning environment would be:</div>
+                        <label class="option-label">
+                            <input type="radio" name="q10" value="visual" required>
+                            A multimedia classroom with projectors and visual displays
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q10" value="reading">
+                            A quiet library with lots of books and reading materials
+                        </label>
+                        <label class="option-label">
+                            <input type="radio" name="q10" value="practical">
+                            A lab or workshop where you can build and experiment
+                        </label>
+                    </div>
+
+                    <!-- NAVIGATION -->
+                    <div class="quiz-nav">
+                        <button type="button" class="btn-prev" id="prevBtn" onclick="changeQuestion(-1)"
+                            style="display:none">
+                            <i class="fas fa-arrow-left"></i> Previous
+                        </button>
+                        <button type="button" class="btn-next" id="nextBtn" onclick="changeQuestion(1)">
+                            Next <i class="fas fa-arrow-right"></i>
+                        </button>
+                        <button type="submit" class="btn-submit" id="submitBtn">
+                            <i class="fas fa-check"></i> Submit Quiz
+                        </button>
+                    </div>
+
+                </form>
+
+            </div>
+
+            <!-- RIGHT SIDEBAR -->
+            <div class="col-lg-4">
+                <div class="quiz-info">
+                    <h6><i class="fas fa-info-circle"></i> Learning Styles Explained</h6>
+                    <div class="style-item">
+                        <div class="style-dot" style="background:#007bff"></div>
+                        <span><strong>Visual:</strong> You learn best through videos, diagrams and images</span>
+                    </div>
+                    <div class="style-item">
+                        <div class="style-dot" style="background:#6a1b9a"></div>
+                        <span><strong>Reading:</strong> You learn best through text, books and written notes</span>
+                    </div>
+                    <div class="style-item">
+                        <div class="style-dot" style="background:#2e7d32"></div>
+                        <span><strong>Practical:</strong> You learn best through hands-on practice and projects</span>
+                    </div>
+                </div>
+
+                <div class="quiz-info">
+                    <h6><i class="fas fa-lightbulb"></i> Tips for the Quiz</h6>
+                    <p style="font-size:0.9rem; color:#555; line-height:1.7;">
+                        Answer based on what you <strong>actually do</strong>, not what you think you should do.
+                        There are no right or wrong answers — this quiz is only to help you learn better!
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentQuestion = 1;
+        const totalQuestions = 10;
+
+        function changeQuestion(direction) {
+            const currentCard = document.getElementById('q' + currentQuestion);
+            const inputs = currentCard.querySelectorAll('input[type="radio"]');
+            let answered = false;
+
+            inputs.forEach(input => {
+                if (input.checked) answered = true;
+                if (input.checked) {
+                    input.closest('.option-label').classList.add('selected');
+                }
+            });
+
+            if (direction === 1 && !answered) {
+                alert('Please select an answer before proceeding!');
+                return;
+            }
+
+            currentCard.classList.remove('active');
+            currentQuestion += direction;
+
+            const nextCard = document.getElementById('q' + currentQuestion);
+            nextCard.classList.add('active');
+
+            // Update progress
+            const progress = (currentQuestion / totalQuestions) * 100;
+            document.getElementById('progress-bar').style.width = progress + '%';
+            document.getElementById('progress-percent').textContent = Math.round(progress) + '%';
+            document.getElementById('current-q').textContent = currentQuestion;
+
+            // Show/hide buttons
+            document.getElementById('prevBtn').style.display = currentQuestion === 1 ? 'none' : 'block';
+
+            if (currentQuestion === totalQuestions) {
+                document.getElementById('nextBtn').style.display = 'none';
+                document.getElementById('submitBtn').style.display = 'block';
+            } else {
+                document.getElementById('nextBtn').style.display = 'block';
+                document.getElementById('submitBtn').style.display = 'none';
+            }
+        }
+
+        // Highlight selected options
+        document.querySelectorAll('.option-label').forEach(label => {
+            label.addEventListener('click', function () {
+                const card = this.closest('.question-card');
+                card.querySelectorAll('.option-label').forEach(l => l.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+        });
+    </script>
+</body>
+
+</html>

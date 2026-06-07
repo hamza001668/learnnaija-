@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recommendations - LearnNaija</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #f0f2f5;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, #008751, #004225);
+            padding: 12px 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .navbar-brand {
+            color: white !important;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .navbar-brand span {
+            color: #FFD700;
+        }
+
+        .nav-link {
+            color: white !important;
+            font-weight: 500;
+        }
+
+        .btn-logout {
+            background: #FFD700;
+            color: #004225 !important;
+            border-radius: 20px;
+            padding: 6px 20px;
+            font-weight: 700;
+        }
+
+        /* PAGE HEADER */
+        .page-header {
+            background: linear-gradient(135deg, #008751, #004225);
+            color: white;
+            padding: 40px 0;
+            margin-bottom: 40px;
+        }
+
+        .page-header h2 {
+            font-weight: 800;
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .page-header p {
+            opacity: 0.9;
+            margin: 0;
+        }
+
+        /* LEARNING STYLE BADGE */
+        .style-banner {
+            border-radius: 15px;
+            padding: 25px 30px;
+            margin-bottom: 30px;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .style-banner.visual {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+        }
+
+        .style-banner.reading {
+            background: linear-gradient(135deg, #6a1b9a, #4a148c);
+        }
+
+        .style-banner.practical {
+            background: linear-gradient(135deg, #008751, #004225);
+        }
+
+        .style-banner .style-icon {
+            font-size: 3rem;
+            opacity: 0.9;
+        }
+
+        .style-banner h4 {
+            font-weight: 800;
+            margin-bottom: 5px;
+            font-size: 1.4rem;
+        }
+
+        .style-banner p {
+            margin: 0;
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+
+        /* COURSE CARDS */
+        .course-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.08);
+            margin-bottom: 20px;
+            transition: all 0.3s;
+            border-left: 5px solid #008751;
+        }
+
+        .course-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+        }
+
+        .course-card.visual {
+            border-left-color: #007bff;
+        }
+
+        .course-card.reading {
+            border-left-color: #6a1b9a;
+        }
+
+        .course-card.practical {
+            border-left-color: #008751;
+        }
+
+        .course-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .course-title {
+            font-weight: 700;
+            color: #004225;
+            font-size: 1.1rem;
+            margin: 0;
+        }
+
+        .course-badge {
+            font-size: 0.75rem;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .badge-visual {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+
+        .badge-reading {
+            background: #f3e5f5;
+            color: #6a1b9a;
+        }
+
+        .badge-practical {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .course-description {
+            color: #666;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .course-meta {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        .course-meta span {
+            font-size: 0.82rem;
+            color: #888;
+        }
+
+        .course-meta i {
+            color: #008751;
+            margin-right: 4px;
+        }
+
+        .btn-access {
+            background: linear-gradient(135deg, #008751, #004225);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 8px 22px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+
+        .btn-access:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 135, 81, 0.3);
+            color: white;
+        }
+
+        /* NO QUIZ TAKEN */
+        .no-quiz {
+            background: white;
+            border-radius: 15px;
+            padding: 60px 30px;
+            text-align: center;
+            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .no-quiz i {
+            font-size: 4rem;
+            color: #FFD700;
+            margin-bottom: 20px;
+        }
+
+        .no-quiz h4 {
+            color: #004225;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .no-quiz p {
+            color: #666;
+            margin-bottom: 25px;
+        }
+
+        .btn-take-quiz {
+            background: linear-gradient(135deg, #008751, #004225);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            padding: 12px 35px;
+            font-weight: 700;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+
+        .btn-take-quiz:hover {
+            transform: translateY(-2px);
+            color: white;
+        }
+
+        /* SIDEBAR */
+        .sidebar-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.08);
+            margin-bottom: 20px;
+        }
+
+        .sidebar-card h6 {
+            color: #004225;
+            font-weight: 700;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .tip-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 12px;
+            font-size: 0.88rem;
+            color: #555;
+            line-height: 1.5;
+        }
+
+        .tip-item i {
+            color: #008751;
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="/">Learn<span>Naija</span></a>
+            <div class="collapse navbar-collapse justify-content-end">
+                <ul class="navbar-nav align-items-center gap-2">
+                    <li class="nav-item"><a class="nav-link" href="/dashboard"><i class="fas fa-home"></i> Dashboard</a>
+                    </li>
+                    <li class="nav-item"><a class="nav-link" href="/quiz"><i class="fas fa-brain"></i> Retake Quiz</a>
+                    </li>
+                    <li class="nav-item"><a class="nav-link btn-logout" href="/logout"><i
+                                class="fas fa-sign-out-alt"></i> Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+        <div class="container">
+            <h2><i class="fas fa-star"></i> Your Personalized Recommendations</h2>
+            <p>Courses and resources selected specifically for your learning style and department</p>
+        </div>
+    </div>
+
+    <div class="container">
+
+        {% if profile %}
+
+        <div class="row">
+            <div class="col-lg-8">
+
+                <!-- LEARNING STYLE BANNER -->
+                {% if profile.learning_style == 'Visual' %}
+                <div class="style-banner visual">
+                    <div class="style-icon"><i class="fas fa-eye"></i></div>
+                    <div>
+                        <h4>You are a Visual Learner! 👁️</h4>
+                        <p>You learn best through videos, diagrams, charts and visual explanations. We have selected the
+                            best video-based resources for you.</p>
+                    </div>
+                </div>
+                {% elif profile.learning_style == 'Reading' %}
+                <div class="style-banner reading">
+                    <div class="style-icon"><i class="fas fa-book"></i></div>
+                    <div>
+                        <h4>You are a Reading Learner! 📖</h4>
+                        <p>You learn best through reading texts, articles and written materials. We have selected the
+                            best reading resources for you.</p>
+                    </div>
+                </div>
+                {% else %}
+                <div class="style-banner practical">
+                    <div class="style-icon"><i class="fas fa-tools"></i></div>
+                    <div>
+                        <h4>You are a Practical Learner! 🛠️</h4>
+                        <p>You learn best through hands-on practice and projects. We have selected the best practical
+                            resources for you.</p>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- RECOMMENDED COURSES -->
+                <h5 style="color:#004225; font-weight:700; margin-bottom:20px;">
+                    <i class="fas fa-graduation-cap"></i>
+                    Recommended for {{ current_user.department }} — {{ current_user.level }}
+                </h5>
+
+                {% for course in recommendations %}
+                <div class="course-card {{ profile.learning_style|lower }}">
+                    <div class="course-header">
+                        <h5 class="course-title">{{ course.title }}</h5>
+                        <span class="course-badge badge-{{ profile.learning_style|lower }}">
+                            {{ profile.learning_style }} Learning
+                        </span>
+                    </div>
+                    <p class="course-description">{{ course.description }}</p>
+                    <div class="course-meta">
+                        <span><i class="fas fa-book"></i> {{ course.subject }}</span>
+                        <span><i class="fas fa-layer-group"></i> {{ course.level }}</span>
+                        <span><i class="fas fa-play-circle"></i> {{ course.course_type }}</span>
+                    </div>
+                    <a href="{{ course.resource_link }}" target="_blank" class="btn-access">
+                        <i class="fas fa-external-link-alt"></i> Access Resource
+                    </a>
+                </div>
+                {% endfor %}
+
+            </div>
+
+            <!-- SIDEBAR -->
+            <div class="col-lg-4">
+                <div class="sidebar-card">
+                    <h6><i class="fas fa-lightbulb"></i> Study Tips for You</h6>
+
+                    {% if profile.learning_style == 'Visual' %}
+                    <div class="tip-item"><i class="fas fa-check"></i> Use mind maps and diagrams when studying</div>
+                    <div class="tip-item"><i class="fas fa-check"></i> Watch YouTube tutorials for difficult topics
+                    </div>
+                    <div class="tip-item"><i class="fas fa-check"></i> Use colour coding in your notes</div>
+                    <div class="tip-item"><i class="fas fa-check"></i> Draw flowcharts to understand processes</div>
+                    <div class="tip-item"><i class="fas fa-check"></i> Use infographics to summarize topics</div>
+                    {% elif profile.learning_style == 'Reading' %}
+                    <div class="tip-item"><i class="fas fa-check"></i> Take detailed written notes in class</div>
+                    <div class="tip-item"><i class="fas fa-check"></i> Read textbooks and summarize chapters</div>
+                    <div class="tip-item"><i class="fas fa-check"></i> Make lists and written outlines</div>
+                    <div class="tip-item"><i class="fas fa-check"></i> Use flashcards with written definitions</div>
+                    <div class="tip-item"><i class="fas fa-check"></i> Write essays to reinforce understanding</div>
+                    {% else %}
+                    <div class="tip-item"><i class="fas fa-check"></i> Always practice with real examples</div>
+                    <div class="tip-item"><i class="fas fa-check"></i> Work on projects and assignments early</div>
+                    <div class="tip-item"><i class="fas fa-check"></i> Join study groups for discussions</div>
+                    <div class="tip-item"><i class="fas fa-check"></i> Apply theories to real-life situations</div>
+                    <div class="tip-item"><i class="fas fa-check"></i> Do past questions repeatedly</div>
+                    {% endif %}
+                </div>
+
+                <div class="sidebar-card">
+                    <h6><i class="fas fa-redo"></i> Want to Retake?</h6>
+                    <p style="font-size:0.9rem; color:#666; margin-bottom:15px;">
+                        If you feel your results don't match how you learn, you can retake the quiz anytime.
+                    </p>
+                    <a href="/quiz" class="btn-access w-100 text-center">
+                        <i class="fas fa-brain"></i> Retake Quiz
+                    </a>
+                </div>
+
+            </div>
+        </div>
+
+        {% else %}
+
+        <!-- NO QUIZ TAKEN -->
+        <div class="no-quiz">
+            <i class="fas fa-brain"></i>
+            <h4>You haven't taken the quiz yet!</h4>
+            <p>Take the learning style quiz first to get your personalized course recommendations</p>
+            <a href="/quiz" class="btn-take-quiz">
+                <i class="fas fa-play"></i> Take the Quiz Now
+            </a>
+        </div>
+
+        {% endif %}
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
