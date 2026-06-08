@@ -20,6 +20,23 @@ db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
+# Create tables on startup
+with app.app_context():
+    db.create_all()
+    admin_exists = User.query.filter_by(email='admin@learnnaija.com').first()
+    if not admin_exists:
+        hashed_password = bcrypt.generate_password_hash('admin123').decode('utf-8')
+        admin = User(
+            full_name='Admin User',
+            email='admin@learnnaija.com',
+            password=hashed_password,
+            university='LearnNaija HQ',
+            department='Administration',
+            level='N/A',
+            role='admin'
+        )
+        db.session.add(admin)
+        db.session.commit()
 
 # ========== DATABASE MODELS ==========
 
