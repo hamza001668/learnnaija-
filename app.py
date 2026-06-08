@@ -8,7 +8,8 @@ import os
 # Initialize the app
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'nigeria-learning-system-2024'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///learning.db'
+import os
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///learning.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Initialize extensions
