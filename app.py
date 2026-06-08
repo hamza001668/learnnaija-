@@ -20,24 +20,6 @@ db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
-# Create tables on startup
-with app.app_context():
-    db.create_all()
-    admin_exists = User.query.filter_by(email='admin@learnnaija.com').first()
-    if not admin_exists:
-        hashed_password = bcrypt.generate_password_hash('admin123').decode('utf-8')
-        admin = User(
-            full_name='Admin User',
-            email='admin@learnnaija.com',
-            password=hashed_password,
-            university='LearnNaija HQ',
-            department='Administration',
-            level='N/A',
-            role='admin'
-        )
-        db.session.add(admin)
-        db.session.commit()
-
 # ========== DATABASE MODELS ==========
 
 class User(db.Model, UserMixin):
@@ -275,9 +257,30 @@ def add_course():
 def get_profile(user_id):
     return LearningProfile.query.filter_by(user_id=user_id).first()
 # ========== RUN APP ==========
-if __name__ == '__main__':
+# This runs on every startup including Render
+def initialize_database():
     with app.app_context():
         db.create_all()
+        admin_exists = User.query.filter_by(email='admin@learnnaija.com').first()
+        if not admin_exists:
+            hashed_password = bcrypt.generate_password_hash('admin123').decode('utf-8')
+            admin = User(
+                full_name='Admin User',
+                email='admin@learnnaija.com',
+                password=hashed_password,
+                university='LearnNaija HQ',
+                department='Administration',
+                level='N/A',
+                role='admin'
+            )
+            db.session.add(admin)
+            db.session.commit()
+            print('Admin created successfully!')
+
+initialize_database()
+
+if __name__ == '__main__':
+    app.run(debug=True)
         # Create admin if not exists
         admin_exists = User.query.filter_by(email='admin@learnnaija.com').first()
         if not admin_exists:
