@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for, flash, request, session
+from flask import Flask, render_template, redirect, url_for, flash, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from flask_bcrypt import Bcrypt
@@ -88,7 +88,28 @@ def load_user(user_id):
 
 @app.route('/setup')
 def setup():
-    @app.route('/add-courses')
+    try:
+        db.create_all()
+        admin_exists = User.query.filter_by(email='admin@learnnaija.com').first()
+        if not admin_exists:
+            hashed_password = bcrypt.generate_password_hash('admin123').decode('utf-8')
+            admin = User(
+                full_name='Admin User',
+                email='admin@learnnaija.com',
+                password=hashed_password,
+                university='LearnNaija HQ',
+                department='Administration',
+                level='N/A',
+                role='admin'
+            )
+            db.session.add(admin)
+            db.session.commit()
+            return 'Database setup complete and admin created successfully!'
+        return 'Database already setup!'
+    except Exception as e:
+        return f'Error: {str(e)}'
+
+@app.route('/add-courses')
 def add_courses_route():
     try:
         existing_titles = [c.title for c in Course.query.all()]
@@ -146,26 +167,6 @@ def add_courses_route():
         return f'Done! Added {added} new courses! Total now: {Course.query.count()}'
     except Exception as e:
         return f'Error: {str(e)}'
-    try:
-        db.create_all()
-        admin_exists = User.query.filter_by(email='admin@learnnaija.com').first()
-        if not admin_exists:
-            hashed_password = bcrypt.generate_password_hash('admin123').decode('utf-8')
-            admin = User(
-                full_name='Admin User',
-                email='admin@learnnaija.com',
-                password=hashed_password,
-                university='LearnNaija HQ',
-                department='Administration',
-                level='N/A',
-                role='admin'
-            )
-            db.session.add(admin)
-            db.session.commit()
-            return 'Database setup complete and admin created successfully!'
-        return 'Database already setup!'
-    except Exception as e:
-        return f'Error: {str(e)}'
 
 @app.route('/')
 def home():
@@ -193,7 +194,6 @@ def register():
             return redirect(url_for('register'))
 
         hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
-
         new_user = User(
             full_name=full_name,
             email=email,
@@ -205,7 +205,6 @@ def register():
         )
         db.session.add(new_user)
         db.session.commit()
-
         flash('Account created successfully! Please login.', 'success')
         return redirect(url_for('login'))
 
@@ -217,9 +216,7 @@ def login():
     if request.method == 'POST':
         email = request.form.get('email')
         password = request.form.get('password')
-
         user = User.query.filter_by(email=email).first()
-
         if user and bcrypt.check_password_hash(user.password, password):
             login_user(user)
             flash('Login successful! Welcome back.', 'success')
@@ -230,7 +227,6 @@ def login():
         else:
             flash('Invalid email or password!', 'danger')
             return redirect(url_for('login'))
-
     return render_template('login.html')
 
 # ========== LOGOUT ==========
@@ -278,7 +274,6 @@ def quiz():
             )
             db.session.add(profile)
         db.session.commit()
-
         flash(f'Quiz completed! Your learning style is: {learning_style}', 'success')
         return redirect(url_for('recommendations'))
 
