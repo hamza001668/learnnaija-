@@ -8,7 +8,8 @@ import os
 # Initialize the app
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'nigeria-learning-system-2024'
-import os
+
+# Database configuration
 database_url = os.environ.get('DATABASE_URL', 'sqlite:///learning.db')
 if database_url.startswith('postgres://'):
     database_url = database_url.replace('postgres://', 'postgresql://', 1)
@@ -20,9 +21,10 @@ db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
+
 # ========== DATABASE MODELS ==========
 
-class User(db.Model, UserMixin):
+class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     full_name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
@@ -32,6 +34,21 @@ class User(db.Model, UserMixin):
     level = db.Column(db.String(10), nullable=False)
     role = db.Column(db.String(10), default='student')
     date_registered = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def get_id(self):
+        return str(self.id)
+
+    @property
+    def is_active(self):
+        return True
+
+    @property
+    def is_authenticated(self):
+        return True
+
+    @property
+    def is_anonymous(self):
+        return False
 
 class Course(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -68,6 +85,7 @@ def load_user(user_id):
     return User.query.get(int(user_id))
 
 # ========== ROUTES ==========
+
 @app.route('/setup')
 def setup():
     try:
@@ -107,21 +125,17 @@ def register():
         department = request.form.get('department')
         level = request.form.get('level')
 
-        # Check if passwords match
         if password != confirm_password:
             flash('Passwords do not match!', 'danger')
             return redirect(url_for('register'))
 
-        # Check if email already exists
         existing_user = User.query.filter_by(email=email).first()
         if existing_user:
             flash('Email already registered! Please login.', 'danger')
             return redirect(url_for('register'))
 
-        # Hash the password
         hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
 
-        # Save new user to database
         new_user = User(
             full_name=full_name,
             email=email,
@@ -146,7 +160,6 @@ def login():
         email = request.form.get('email')
         password = request.form.get('password')
 
-        # Find user by email
         user = User.query.filter_by(email=email).first()
 
         if user and bcrypt.check_password_hash(user.password, password):
@@ -176,8 +189,6 @@ def logout():
 def student_dashboard():
     return render_template('dashboard.html')
 
-# ========== ADMIN DASHBOARD ==========
-
 # ========== QUIZ ==========
 @app.route('/quiz', methods=['GET', 'POST'])
 @login_required
@@ -188,12 +199,10 @@ def quiz():
             answer = request.form.get(f'q{i}')
             answers.append(answer)
 
-        # Count each learning style
         visual = answers.count('visual')
         reading = answers.count('reading')
         practical = answers.count('practical')
 
-        # Determine dominant learning style
         if visual >= reading and visual >= practical:
             learning_style = 'Visual'
         elif reading >= visual and reading >= practical:
@@ -201,7 +210,6 @@ def quiz():
         else:
             learning_style = 'Practical'
 
-        # Save to database
         existing_profile = LearningProfile.query.filter_by(user_id=current_user.id).first()
         if existing_profile:
             existing_profile.learning_style = learning_style
@@ -217,6 +225,7 @@ def quiz():
         return redirect(url_for('recommendations'))
 
     return render_template('quiz.html')
+
 # ========== RECOMMENDATIONS ==========
 @app.route('/recommendations')
 @login_required
@@ -228,8 +237,9 @@ def recommendations():
             course_type=profile.learning_style
         ).all()
     return render_template('recommendations.html',
-                         profile=profile,
-                         recommendations=recommendations)
+                           profile=profile,
+                           recommendations=recommendations)
+
 # ========== ADMIN ROUTES ==========
 @app.route('/admin')
 @login_required
@@ -278,167 +288,7 @@ def add_course():
 @app.template_filter('get_profile')
 def get_profile(user_id):
     return LearningProfile.query.filter_by(user_id=user_id).first()
+
 # ========== RUN APP ==========
-# This runs on every startup including Render
-def initialize_database():
-    with app.app_context():
-        db.create_all()
-        admin_exists = User.query.filter_by(email='admin@learnnaija.com').first()
-        if not admin_exists:
-            hashed_password = bcrypt.generate_password_hash('admin123').decode('utf-8')
-            admin = User(
-                full_name='Admin User',
-                email='admin@learnnaija.com',
-                password=hashed_password,
-                university='LearnNaija HQ',
-                department='Administration',
-                level='N/A',
-                role='admin'
-            )
-            db.session.add(admin)
-            db.session.commit()
-            print('Admin created successfully!')
-
-initialize_database()
-
 if __name__ == '__main__':
-    app.run(debug=True)
-        # Create admin if not exists
-        admin_exists = User.query.filter_by(email='admin@learnnaija.com').first()
-        if not admin_exists:
-            hashed_password = bcrypt.generate_password_hash('admin123').decode('utf-8')
-            admin = User(
-                full_name='Admin User',
-                email='admin@learnnaija.com',
-                password=hashed_password,
-                university='LearnNaija HQ',
-                department='Administration',
-                level='N/A',
-                role='admin'
-            )
-            db.session.add(admin)
-            db.session.commit()
-            print('Admin created successfully!')
-
-        # Add sample courses if none exist
-        if Course.query.count() == 0:
-            sample_courses = [
-
-                # VISUAL COURSES
-                Course(title='Introduction to Programming (Video Series)',
-                    description='A complete video course covering programming basics with animations and visual examples perfect for beginners.',
-                    subject='Computer Science', level='100 Level',
-                    resource_link='https://www.youtube.com/watch?v=zOjov-2OZ0E',
-                    course_type='Visual'),
-
-                Course(title='Data Structures Visualized',
-                    description='Learn data structures through beautiful animations and visual diagrams that make complex topics easy to understand.',
-                    subject='Computer Science', level='200 Level',
-                    resource_link='https://visualgo.net',
-                    course_type='Visual'),
-
-                Course(title='Mathematics for Engineers (Video Lectures)',
-                    description='Video-based mathematics course covering calculus, algebra and statistics with visual explanations.',
-                    subject='Mathematics', level='100 Level',
-                    resource_link='https://www.khanacademy.org/math',
-                    course_type='Visual'),
-
-                Course(title='Business Management Video Course',
-                    description='Comprehensive video lectures on business management principles, organizational behaviour and leadership.',
-                    subject='Business Administration', level='200 Level',
-                    resource_link='https://www.coursera.org/learn/wharton-business-foundations',
-                    course_type='Visual'),
-
-                Course(title='Circuit Analysis Video Tutorials',
-                    description='Step by step video tutorials on electrical circuit analysis with visual diagrams and animations.',
-                    subject='Electrical Engineering', level='200 Level',
-                    resource_link='https://www.youtube.com/watch?v=mc979OhitAg',
-                    course_type='Visual'),
-
-                Course(title='Human Anatomy Video Series',
-                    description='Detailed video lectures on human anatomy with 3D visualizations and diagrams for medical students.',
-                    subject='Medicine', level='200 Level',
-                    resource_link='https://www.khanacademy.org/science/health-and-medicine',
-                    course_type='Visual'),
-
-                # READING COURSES
-                Course(title='Introduction to Computer Science (MIT Notes)',
-                    description='Comprehensive written lecture notes and reading materials from MIT covering all fundamental CS concepts.',
-                    subject='Computer Science', level='100 Level',
-                    resource_link='https://ocw.mit.edu/courses/6-0001-introduction-to-computer-science-and-programming-in-python-fall-2016/',
-                    course_type='Reading'),
-
-                Course(title='Business Law and Ethics Textbook',
-                    description='A complete reading resource covering Nigerian business law, corporate governance and professional ethics.',
-                    subject='Business Administration', level='300 Level',
-                    resource_link='https://openstax.org/books/business-law-i-essentials/pages/1-introduction',
-                    course_type='Reading'),
-
-                Course(title='Engineering Mathematics Textbook',
-                    description='Free online textbook covering all engineering mathematics topics with detailed written explanations and examples.',
-                    subject='Mathematics', level='200 Level',
-                    resource_link='https://openstax.org/subjects/math',
-                    course_type='Reading'),
-
-                Course(title='Principles of Economics (Written Course)',
-                    description='Detailed written course covering micro and macroeconomics principles relevant to Nigerian economy.',
-                    subject='Economics', level='100 Level',
-                    resource_link='https://openstax.org/books/principles-economics-3e/pages/1-introduction',
-                    course_type='Reading'),
-
-                Course(title='Introduction to Law (Reading Materials)',
-                    description='Comprehensive reading materials covering Nigerian law, legal systems and constitutional law for law students.',
-                    subject='Law', level='100 Level',
-                    resource_link='https://www.lawteacher.net/free-law-essays/introduction-to-law/',
-                    course_type='Reading'),
-
-                Course(title='Microbiology Study Notes',
-                    description='Detailed written study notes covering microbiology concepts, bacteria, viruses and laboratory techniques.',
-                    subject='Microbiology', level='300 Level',
-                    resource_link='https://www.ncbi.nlm.nih.gov/books/NBK7627/',
-                    course_type='Reading'),
-
-                # PRACTICAL COURSES
-                Course(title='Python Programming Projects for Beginners',
-                    description='Hands-on Python programming course where you build real projects from day one. Perfect for practical learners.',
-                    subject='Computer Science', level='200 Level',
-                    resource_link='https://www.freecodecamp.org/learn/scientific-computing-with-python/',
-                    course_type='Practical'),
-
-                Course(title='Web Development Bootcamp (Hands-on)',
-                    description='Build real websites from scratch using HTML, CSS and JavaScript through practical hands-on exercises.',
-                    subject='Computer Science', level='300 Level',
-                    resource_link='https://www.freecodecamp.org/learn/responsive-web-design/',
-                    course_type='Practical'),
-
-                Course(title='Accounting Practice Exercises',
-                    description='Practical accounting exercises covering bookkeeping, financial statements and Nigerian tax calculations.',
-                    subject='Accounting', level='200 Level',
-                    resource_link='https://www.accountingcoach.com/accounting-basics/quiz',
-                    course_type='Practical'),
-
-                Course(title='Civil Engineering Lab Projects',
-                    description='Practical civil engineering projects and experiments covering structural analysis and material testing.',
-                    subject='Civil Engineering', level='300 Level',
-                    resource_link='https://www.engineeringintro.com',
-                    course_type='Practical'),
-
-                Course(title='Medical Clinical Practice Guide',
-                    description='Practical clinical skills guide for medical students covering patient examination and diagnostic procedures.',
-                    subject='Medicine', level='400 Level',
-                    resource_link='https://www.amboss.com',
-                    course_type='Practical'),
-
-                Course(title='Business Plan Development Workshop',
-                    description='Practical workshop where you develop a real business plan step by step relevant to Nigerian market.',
-                    subject='Business Administration', level='300 Level',
-                    resource_link='https://www.sba.gov/business-guide/plan-your-business/write-your-business-plan',
-                    course_type='Practical'),
-            ]
-
-            for course in sample_courses:
-                db.session.add(course)
-            db.session.commit()
-            print('Sample courses added successfully!')
-
     app.run(debug=True)
