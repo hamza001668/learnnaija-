@@ -68,6 +68,28 @@ def load_user(user_id):
     return User.query.get(int(user_id))
 
 # ========== ROUTES ==========
+@app.route('/setup')
+def setup():
+    try:
+        db.create_all()
+        admin_exists = User.query.filter_by(email='admin@learnnaija.com').first()
+        if not admin_exists:
+            hashed_password = bcrypt.generate_password_hash('admin123').decode('utf-8')
+            admin = User(
+                full_name='Admin User',
+                email='admin@learnnaija.com',
+                password=hashed_password,
+                university='LearnNaija HQ',
+                department='Administration',
+                level='N/A',
+                role='admin'
+            )
+            db.session.add(admin)
+            db.session.commit()
+            return 'Database setup complete and admin created successfully!'
+        return 'Database already setup!'
+    except Exception as e:
+        return f'Error: {str(e)}'
 
 @app.route('/')
 def home():
